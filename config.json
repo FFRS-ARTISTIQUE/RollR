@@ -1,0 +1,13 @@
+{
+    "background_color": "#223A5E",
+    "color_display": "#4472C4",
+    "DISPLAY_SERVER": false,
+    "DISPLAY_SERVER_IP": "192.168.1.50",
+    "DISPLAY_SERVER_PORT": "5000",
+    "DISPLAY_SERVER_TIMEOUT": "30",
+    "DISPLAY_SERVER_BOUTON": false,
+    "message_box_pdf": false,
+    "message_box_all_pdf": true,
+    "assessment_details": false,
+    "VERSION": "v0.2.7 - 23/05/2026"
+}
