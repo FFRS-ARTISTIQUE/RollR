@@ -26,6 +26,8 @@ from PIL import Image, ImageTk
 # Modules personnalisés
 from config import get, set
 
+from datetime import datetime
+
 DB_FILE = "competitions.db"
 
 ELEMENT_NAMES = {
@@ -94,6 +96,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS resultats (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     categorie_id INTEGER,
+    revise TEXT,
     nom TEXT,
     prenom TEXT,
     club TEXT,
@@ -517,6 +520,7 @@ def ouvrir_categorie(cat_id, texte_categorie):
                 cur.execute("""
                     SELECT
                         r.id,
+                        r.revise,
                         r.nom,
                         r.prenom,
                         r.club,
@@ -560,6 +564,33 @@ def ouvrir_categorie(cat_id, texte_categorie):
                     styles["Title"]
                 ))
 
+                # Récupération de la dernière révision
+                dates_revision = [
+                    row[1] for row in rows
+                    if row[1] is not None
+                ]
+
+                if dates_revision:
+                    from reportlab.lib.styles import ParagraphStyle
+
+                    style_revision = ParagraphStyle(
+                        "Revision",
+                        parent=styles["Normal"],
+                        textColor=colors.red,
+                        alignment=1,
+                        fontSize=9
+                    )
+
+                    derniere_revision = max(
+                        dates_revision,
+                        key=lambda d: datetime.strptime(d, "%d/%m/%Y %H:%M:%S")
+                    )
+
+                    story.append(Paragraph(
+                        f"<b>Dernière révision : {derniere_revision}</b>",
+                        style_revision
+                    ))
+
                 story.append(Spacer(1, 20))
 
                 table_data = [[
@@ -580,6 +611,7 @@ def ouvrir_categorie(cat_id, texte_categorie):
 
                 for (
                     _,
+                    revise,
                     nom,
                     prenom,
                     club,
@@ -588,7 +620,7 @@ def ouvrir_categorie(cat_id, texte_categorie):
                     sc,
                     pen,
                     total,
-                    medal
+                    medal                    
                 ) in rows:
 
                     if total != last_total or sc != last_sc:
@@ -596,9 +628,14 @@ def ouvrir_categorie(cat_id, texte_categorie):
 
                     last_total = total
                     last_sc = sc
+                    place_display = (
+                        f'<font color="red"><b>R</b></font> {current_rank}'
+                        if revise is not None
+                        else str(current_rank)
+                    )
 
                     table_data.append([
-                        current_rank,
+                        Paragraph(place_display, styles["Normal"]),
                         nom,
                         prenom,
                         club,
@@ -632,6 +669,7 @@ def ouvrir_categorie(cat_id, texte_categorie):
 
                     (
                         resultat_id,
+                        revise,
                         nom,
                         prenom,
                         club,
@@ -671,6 +709,17 @@ def ouvrir_categorie(cat_id, texte_categorie):
                         styles["Normal"]
                     ))
 
+                    if revise is not None:
+                        style_revision_patineur = ParagraphStyle(
+                            "RevisionPatineur",
+                            parent=styles["Normal"],
+                            textColor=colors.red
+                        )
+
+                        story.append(Paragraph(
+                            f"<b>Révisé : {revise}</b>",
+                            style_revision_patineur
+                        ))
                     story.append(Spacer(1, 15))
 
                     # =====================================================

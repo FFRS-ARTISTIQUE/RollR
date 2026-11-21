@@ -18,7 +18,7 @@ Ce projet fonctionne sur **Windows 64 bits**, sans installation, sans dépendanc
 ## ▶️ Lancement
 
 ```
-Cliquer sur le fichier menu.exe qui se trouve dans le dossier dist.
+Cliquer sur le fichier RollR.exe qui se trouve dans le dossier dist.
 ```
 
 Le logiciel démarre en **plein écran**.

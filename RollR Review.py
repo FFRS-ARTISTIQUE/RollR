@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox as _QComboBox
+from datetime import datetime
 
 class QComboBox(_QComboBox):
     def wheelEvent(self, event):
@@ -127,7 +128,7 @@ class DBEditor(QWidget):
         btn_save.clicked.connect(self.open_edit_window)
 
         # ================== VERSION LOGICIEL ==================
-        version = QLabel("v0.0.1 - 25/05/2026")
+        version = QLabel("v0.0.2 - 21/11/2026")
         version.setFont(QFont("Arial", 8))
 
         # ================== AJOUT LAYOUT ==================
@@ -317,7 +318,7 @@ class ResultEditWindow(QWidget):
         return lbl
     
     def delete_penalite(self, id_, widget):
-
+        self.revise()
         self.cur.execute("""
             DELETE FROM details_resultats
             WHERE id=?
@@ -339,6 +340,20 @@ class ResultEditWindow(QWidget):
 
         self.init_ui()
         self.load_data()
+
+    # ======================================================
+    # DATE ET HEURE DE LA MODIFICATION
+    # ======================================================
+
+    def revise(self):
+        # Date et heure de la modification
+        date_revision = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        
+        self.cur.execute("""
+            UPDATE resultats
+            SET revise = ?
+            WHERE id = ?
+        """, (date_revision, self.resultat_id))
 
     # ---------------- UI ----------------
 
@@ -404,9 +419,11 @@ class ResultEditWindow(QWidget):
         self.lbl_categorie = QLabel("")
         self.lbl_nom = QLabel("")
         self.lbl_result = QLabel("")
+        self.lbl_revise = QLabel("")
         info_layout.addWidget(self.lbl_categorie, 0, 0)
         info_layout.addWidget(self.lbl_nom, 0, 1)
-        info_layout.addWidget(self.lbl_result)
+        info_layout.addWidget(self.lbl_result, 1, 0)
+        info_layout.addWidget(self.lbl_revise, 1, 1)
 
         self.layout.addWidget(self.info_widget)
 
@@ -446,6 +463,7 @@ class ResultEditWindow(QWidget):
                    c.niveau,
                    c.categorie,
                    c.genre,
+                   r.revise,
                    r.nom,
                    r.prenom,
                    r.club,
@@ -463,7 +481,7 @@ class ResultEditWindow(QWidget):
 
         if result:
 
-            self.discipline, niveau, categorie, genre, nom, prenom, club, score_technique, score_composantes, penalites, score_total = result
+            self.discipline, niveau, categorie, genre, revise, nom, prenom, club, score_technique, score_composantes, penalites, score_total = result
 
             self.lbl_categorie.setText(
                 f"{self.discipline} | {niveau} | {categorie} | {genre}"
@@ -472,6 +490,12 @@ class ResultEditWindow(QWidget):
             self.lbl_result.setText(
                 f"Score technique: {score_technique} points   |    Score composantes: {score_composantes} points    |    Pénalités: {penalites} points    |    Score total : {score_total} points"
             )
+            if revise is not None:
+                self.lbl_revise.setText(
+                    f'<font color="red"><b>Révisé le {revise}</b></font>'
+                )
+            else:
+                self.lbl_revise.setText("Pas de révision")
 
         self.cur.execute("""
             SELECT id,
@@ -650,7 +674,7 @@ class ResultEditWindow(QWidget):
                 
                 lbl_nom = QLabel(label)
                 combo_points = QComboBox()
-                combo_points.addItems(["0.5", "1", "2", "3"])
+                combo_points.addItems(["0.5", "1", "1.5", "2", "2.5", "3"])
 
                 value = str(points)
 
@@ -742,7 +766,7 @@ class ResultEditWindow(QWidget):
     # ---------------- PENALITE ----------------
 
     def add_penalite(self):
-
+        self.revise()
         label = self.combo_penalty.currentText()
         value = self.penalties[label]
         if self.discipline == "Freeskating":
@@ -782,7 +806,8 @@ class ResultEditWindow(QWidget):
                 values.get("points"),
                 id_
             ))
-        
+
+        self.revise()
         self.recalcul_scores()
 
         msg = QMessageBox(self)

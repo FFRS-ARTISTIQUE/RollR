@@ -2092,8 +2092,8 @@ def show_validation_popup():
     popup.configure(bg=BG)
 
     # Taille de la popup
-    popup_width = 500
-    popup_height = 600
+    popup_width = 800
+    popup_height = 500
 
     # Taille de l'écran
     screen_width = popup.winfo_screenwidth()
@@ -2182,16 +2182,16 @@ def show_validation_popup():
         labels_map = {
             0.5: "Pauvre",
             1: "Faible",
+            1.5: "Faible",
             2: "Correcte",
+            2.5: "Correcte",
             3: "Bonne"
         }
 
         names = [
-            "Posture",
+            "Posture / Qualité de patinage",
             "Vitesse",
-            "Qualité de patinage",
-            "Chorégraphie",
-            "Implication",
+            "Chorégraphie / Implication",
             "Attitudes"
         ]
 
@@ -2217,11 +2217,11 @@ def show_validation_popup():
                 font=("Arial", 12, "bold"),
                 fg="white",
                 bg=BG,
-                width=18,
+                width=25,
                 anchor="w"
             ).grid(row=r, column=0, padx=2, pady=6)
 
-            for c, val in enumerate((0.5, 1, 2, 3), start=1):
+            for c, val in enumerate(labels_map, start=1):
 
                 selected = composantes.get(name) == val
 
@@ -2236,8 +2236,8 @@ def show_validation_popup():
                 ).grid(row=r, column=c, padx=2, pady=6)
         # Activation bouton confirm
         noms_attendus = {
-            "Posture", "Vitesse", "Qualité de patinage",
-            "Chorégraphie", "Implication", "Attitudes"
+            "Posture / Qualité de patinage", "Vitesse",
+            "Chorégraphie / Implication", "Attitudes"
         }
 
         noms_renseignes = {
